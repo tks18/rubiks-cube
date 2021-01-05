@@ -16,32 +16,95 @@ color[] colors = {
 };
 
 int dim = 3;
-Cubie[][][] cube = new Cubie[dim][dim][dim];
+Cubie[] cube = new Cubie[dim * dim * dim];
 void setup(){
   size(600, 600, P3D);
   cam = new PeasyCam(this, 400);
-  for (int i = 0; i < dim; i++){
-    for (int j = 0; j < dim; j++){
-      for (int k = 0; k < dim; k++){
-        float len = 50;
-        float offset = (dim - 1) * len * 0.5;
-        float x = len * i - offset;
-        float y = len * j - offset;
-        float z = len * k - offset;
-        cube[i][j][k] = new Cubie(x, y, z, len);
-        
+  int index = 0;
+  for (int x = -1; x <= 1; x++){
+    for (int y = -1; y <= 1; y++){
+      for (int z = -1; z <= 1; z++){
+        PMatrix3D matrix = new PMatrix3D();
+        matrix.translate(x,y,z);
+        cube[index] = new Cubie(matrix, x, y, z);
+        index++;
       }
     }
   }
 }
 
+void turnX(int index){
+  for (int i = 0; i < cube.length; i++){
+    Cubie qb = cube[i];
+    if(qb.x == index){
+      PMatrix2D matrix = new PMatrix2D();
+      matrix.rotate(HALF_PI);
+      matrix.translate(qb.y, qb.z);
+      
+      qb.update(round(qb.x), round(matrix.m02), round(matrix.m12));
+    }
+  }
+}
+
+void turnY(int index){
+  for (int i = 0; i < cube.length; i++){
+    Cubie qb = cube[i];
+    if(qb.y == index){
+      PMatrix2D matrix = new PMatrix2D();
+      matrix.rotate(HALF_PI);
+      matrix.translate(qb.x, qb.z);
+      
+      qb.update(round(matrix.m02), round(qb.y), round(matrix.m12));
+    }
+  }
+}
+
+void turnZ(int index){
+  for (int i = 0; i < cube.length; i++){
+    Cubie qb = cube[i];
+    if(qb.z == index){
+      PMatrix2D matrix = new PMatrix2D();
+      matrix.rotate(HALF_PI);
+      matrix.translate(qb.x, qb.y);
+      
+      qb.update(round(matrix.m02), round(matrix.m12), round(qb.z));
+    }
+  }
+}
+
+void keyPressed(){
+  switch (key) {
+    case '1':
+      turnZ(-1);
+      break;
+    case '2':
+      turnZ(1);
+      break;
+    case '3':
+      turnY(-1);
+      break;
+    case '4':
+      turnY(1);
+      break;
+    case '5':
+      turnX(-1);
+      break;
+    case '6':
+      turnX(1);
+      break;
+  }
+  
+  //if (key == '1') {
+  //  turnZ(-1);
+  //} else if (key == '2'){
+  //  turnZ(1);
+  //}
+}
+
 void draw(){
   background(55);
-  for (int i = 0; i < dim; i++){
-    for (int j = 0; j < dim; j++){
-      for (int k = 0; k < dim; k++){
-        cube[i][j][k].show();
-      }
-    }
+  scale(50);
+  for (int i = 0; i < cube.length; i++){
+    cube[i].show();
   }
 }
