@@ -1,22 +1,15 @@
 import peasy.*;
 PeasyCam cam;
 
-final int UPP = 0;
-final int DWN = 1;
-final int RGT = 2;
-final int LFT = 3;
-final int FRT = 4;
-final int BCK = 5;
-
-// UP, DOWN, RIGHT, LEFT, FRONT, BACK
-color[] colors = {
-  #FFFFFF, #FFFF00,
-  #FFA500, #FF0000,
-  #00FF00, #0000FF
-};
-
 int dim = 3;
 Cubie[] cube = new Cubie[dim * dim * dim];
+
+String[] allMoves = {"f", "b", "u", "d", "l","r"};
+String sequence = "";
+int counter = 0;
+
+boolean started = false;
+
 void setup(){
   size(600, 600, P3D);
   cam = new PeasyCam(this, 400);
@@ -31,67 +24,109 @@ void setup(){
       }
     }
   }
+  for (int i = 0; i < 200; i++){
+    int r = int(random(allMoves.length));
+    sequence += allMoves[r];
+    if(random(1) < 0.5) {
+      sequence += allMoves[r];
+    } else {
+      sequence += allMoves[r].toUpperCase();
+    }
+  }
+  println(sequence);
+  for (int i = sequence.length()-1; i >= 0; i--){
+    String nextMove = flipCase(sequence.charAt(i));
+    sequence += nextMove;
+  }
 }
 
-void turnX(int index){
+String flipCase(char c) {
+  String s = ""+c;
+  if(s.equals(s.toLowerCase())){
+    return s.toUpperCase();
+  } else {
+    return s.toLowerCase();
+  }
+}
+
+void turnX(int index, int dir){
   for (int i = 0; i < cube.length; i++){
     Cubie qb = cube[i];
     if(qb.x == index){
       PMatrix2D matrix = new PMatrix2D();
-      matrix.rotate(HALF_PI);
-      matrix.translate(qb.y, qb.z);
-      
+      matrix.rotate(dir * HALF_PI);
+      matrix.translate(qb.y, qb.z); 
+      qb.turnFacesX(dir);
       qb.update(round(qb.x), round(matrix.m02), round(matrix.m12));
     }
   }
 }
 
-void turnY(int index){
+void turnY(int index, int dir){
   for (int i = 0; i < cube.length; i++){
     Cubie qb = cube[i];
     if(qb.y == index){
       PMatrix2D matrix = new PMatrix2D();
-      matrix.rotate(HALF_PI);
+      matrix.rotate(dir*HALF_PI);
       matrix.translate(qb.x, qb.z);
-      
+      qb.turnFacesY(dir);
       qb.update(round(matrix.m02), round(qb.y), round(matrix.m12));
     }
   }
 }
 
-void turnZ(int index){
+void turnZ(int index, int dir){
   for (int i = 0; i < cube.length; i++){
     Cubie qb = cube[i];
     if(qb.z == index){
       PMatrix2D matrix = new PMatrix2D();
-      matrix.rotate(HALF_PI);
+      matrix.rotate(dir * HALF_PI);
       matrix.translate(qb.x, qb.y);
-      
+      qb.turnFacesZ(dir);
       qb.update(round(matrix.m02), round(matrix.m12), round(qb.z));
     }
   }
 }
 
-void keyPressed(){
-  switch (key) {
-    case '1':
-      turnZ(-1);
-      break;
-    case '2':
-      turnZ(1);
-      break;
-    case '3':
-      turnY(-1);
-      break;
-    case '4':
-      turnY(1);
-      break;
-    case '5':
-      turnX(-1);
-      break;
-    case '6':
-      turnX(1);
-      break;
+
+void applyMove(char move){
+  switch (move) {
+    case 'f': 
+    turnZ(1, 1);
+    break;
+  case 'F': 
+    turnZ(1, -1);
+    break;  
+  case 'b': 
+    turnZ(-1, 1);
+    break;
+  case 'B': 
+    turnZ(-1, -1);
+    break;
+  case 'u': 
+    turnY(1, 1);
+    break;
+  case 'U': 
+    turnY(1, -1);
+    break;
+  case 'd': 
+    turnY(-1, 1);
+    break;
+  case 'D': 
+    turnY(-1, -1);
+    break;
+  case 'l': 
+    turnX(-1, 1);
+    break;
+  case 'L': 
+    turnX(-1, -1);
+    break;
+  case 'r': 
+    turnX(1, 1);
+    break;
+  case 'R': 
+    turnX(1, -1);
+    break;
   }
   
   //if (key == '1') {
@@ -101,8 +136,63 @@ void keyPressed(){
   //}
 }
 
+void keyPressed(){
+  if(key == ' '){
+    started = true;
+  } else {
+      switch (key) {
+      case 'f': 
+      turnZ(1, 1);
+      break;
+    case 'F': 
+      turnZ(1, -1);
+      break;  
+    case 'b': 
+      turnZ(-1, 1);
+      break;
+    case 'B': 
+      turnZ(-1, -1);
+      break;
+    case 'u': 
+      turnY(1, 1);
+      break;
+    case 'U': 
+      turnY(1, -1);
+      break;
+    case 'd': 
+      turnY(-1, 1);
+      break;
+    case 'D': 
+      turnY(-1, -1);
+      break;
+    case 'l': 
+      turnX(-1, 1);
+      break;
+    case 'L': 
+      turnX(-1, -1);
+      break;
+    case 'r': 
+      turnX(1, 1);
+      break;
+    case 'R': 
+      turnX(1, -1);
+      break;
+    }
+  }
+}
+
+
 void draw(){
   background(55);
+  if(started){
+    if (frameCount % 1 == 0){
+      if(counter < sequence.length()) {
+        char move = sequence.charAt(counter);
+        applyMove(move);
+        counter++;
+      }
+    }
+  }
   scale(50);
   for (int i = 0; i < cube.length; i++){
     cube[i].show();

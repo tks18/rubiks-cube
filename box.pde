@@ -21,6 +21,24 @@ class Cubie{
     faces[5] = new Face(new PVector(-1, 0, 0), color(255, 0, 0));
   }
   
+  void turnFacesZ(int dir) {
+    for (Face f: faces) {
+      f.turnZ(dir*HALF_PI);
+    }
+  }
+  
+  void turnFacesY(int dir) {
+    for (Face f: faces) {
+      f.turnY(dir*HALF_PI);
+    }
+  }
+  
+  void turnFacesX(int dir) {
+    for (Face f: faces) {
+      f.turnX(dir*HALF_PI);
+    }
+  }
+  
   void update(int x, int y, int z){
     matrix.reset();
     matrix.translate(x, y, z);
